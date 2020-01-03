@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_clock_helper/model.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,59 @@ final _darkTheme = {
   _Element.shadow: Color(0xFF174EA6),
 };
 
+final _hours = [
+  "twelve",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven"
+];
+
+final _minutes = [
+  "o'clock",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "quarter",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+  "twenty one",
+  "twenty two",
+  "twenty three",
+  "twenty four",
+  "twenty five",
+  "twenty six",
+  "twenty seven",
+  "twenty eight",
+  "twenty nine",
+  "half"
+];
+
+final _titlePartLabels = ["AM", "PM"];
+
+final _specialTimes = ["Midnight", "Noon"];
+
 class WordClock extends StatefulWidget {
   const WordClock(this.model);
 
@@ -37,11 +91,18 @@ class WordClock extends StatefulWidget {
 class _WordClockState extends State<WordClock> {
   DateTime _dateTime = DateTime.now();
   Timer _timer;
+  String _hoursInLetters;
+  String _timeSeparator;
+  String _minutesPart;
+  String _titlePart;
+  bool _isMidnight;
+  bool _isNoon;
 
   @override
   void initState() {
     super.initState();
     widget.model.addListener(_updateModel);
+    _dateTime = DateTime.parse("1969-07-20 11:55:04Z");
     _updateTime();
     _updateModel();
   }
@@ -69,16 +130,54 @@ class _WordClockState extends State<WordClock> {
     });
   }
 
+  String _renderHoursPart(DateTime dateTime) {
+    int twelveHourFormattedHour = dateTime.hour % 12;
+    if (_isMidnight) return _specialTimes[0];
+    if (_isNoon) return _specialTimes[1];
+
+    return dateTime.minute < 30
+        ? _hours[twelveHourFormattedHour]
+        : _hours[(twelveHourFormattedHour + 1) % 12];
+  }
+
+  String _renderTimeSeparator(DateTime dateTime) {
+    return dateTime.minute > 30 ? 'to' : 'past';
+  }
+
+  String _renderMinutesPart(DateTime dateTime) {
+    var minutes = dateTime.minute > 30 ? 60 - dateTime.minute : dateTime.minute;
+    return _minutes[minutes];
+  }
+
+  String _renderTitlePart(DateTime dateTime) {
+    if (dateTime.hour < 12) return _titlePartLabels[0];
+    return _titlePartLabels[1];
+  }
+
   void _updateTime() {
     setState(() {
-      _dateTime = DateTime.now();
+      // _dateTime = DateTime.now();
+      _dateTime = _dateTime.add(new Duration(minutes: 1));
+      _isMidnight = _dateTime.hour == 0 && _dateTime.minute == 0;
+      _isNoon = _dateTime.hour == 12 && _dateTime.minute == 0;
+      _hoursInLetters = _renderHoursPart(_dateTime);
+      _timeSeparator = _renderTimeSeparator(_dateTime);
+      _minutesPart = _renderMinutesPart(_dateTime);
+      _titlePart = _renderTitlePart(_dateTime);
+      // _timer = Timer(
+      //   Duration(minutes: 1) -
+      //       Duration(seconds: _dateTime.second) -
+      //       Duration(milliseconds: _dateTime.millisecond),
+      //   _updateTime,
+      // );
       _timer = Timer(
-        Duration(minutes: 1) -
-            Duration(seconds: _dateTime.second) -
-            Duration(milliseconds: _dateTime.millisecond),
+        Duration(seconds: 1),
         _updateTime,
       );
     });
+    developer.log('_hoursInLetters : $_hoursInLetters', name: 'clock app');
+    developer.log('_timeSeparator : $_timeSeparator', name: 'clock app');
+    developer.log('_minutesPart : $_minutesPart', name: 'clock app');
   }
 
   @override
@@ -106,44 +205,62 @@ class _WordClockState extends State<WordClock> {
       fontSize: 26,
     );
 
-    return Container(
-      color: colors[_Element.background],
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        if (!_isMidnight && !_isNoon)
           Container(
             height: 150,
             child: Text(
-              'AM',
+              _titlePart,
               style: titleTextStyle,
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'twenty two',
-                style: boldSubtitleStyle,
-              ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              "It's",
+              style: boldSubtitleStyle,
+            ),
+            SizedBox(
+              width: 6,
+            ),
+            (_dateTime.minute != 0)
+                ? Text(
+                    _minutesPart,
+                    style: boldSubtitleStyle,
+                  )
+                : Text(
+                    _hoursInLetters,
+                    style: boldSubtitleStyle,
+                  ),
+            if (_dateTime.minute != 0)
               SizedBox(
                 width: 6,
               ),
+            if (_dateTime.minute != 0)
               Text(
-                'past',
+                _timeSeparator,
                 style: defaultSubtitleStyle,
               ),
-              SizedBox(
-                width: 6,
-              ),
+            SizedBox(
+              width: 6,
+            ),
+            if (_dateTime.minute != 0)
               Text(
-                'four.',
+                '$_hoursInLetters.',
                 style: boldSubtitleStyle,
               ),
-            ],
-          ),
-        ],
-      ),
+            if (_dateTime.minute == 0 && !_isMidnight && !_isNoon)
+              Text(
+                '$_minutesPart.',
+                style: boldSubtitleStyle,
+              ),
+          ],
+        ),
+      ],
     );
   }
 }
