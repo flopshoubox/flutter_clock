@@ -102,19 +102,21 @@ class _WordClockState extends State<WordClock> {
         ? _lightTheme
         : _darkTheme;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        ApPmLabel(_dateTime, _isMidnight, _isNoon),
-        SizedBox(
-          height: 10,
-        ),
-        TimeLabel(_dateTime, _isMidnight, _isNoon),
-        SizedBox(
-          height: 20,
-        ),
-      ],
-    );
+    return Container(
+        color: Colors.white,
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              top: 260,
+              child: TimeLabel(_dateTime, _isMidnight, _isNoon),
+              width: 640,
+            ),
+            Positioned(
+              top: 30,
+              left: 150,
+              child: ApPmLabel(_dateTime, _isMidnight, _isNoon),
+            ),
+          ],
+        ));
   }
 }

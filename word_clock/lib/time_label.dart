@@ -107,38 +107,40 @@ class TimeLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      alignment: AlignmentDirectional.center,
       children: <Widget>[
-        Text(
-          (_dateTime.minute != 0) ? _minutesPart : _hoursInLetters,
-          style: boldSubtitleStyle,
-        ),
-        if (_dateTime.minute != 0)
-          SizedBox(
-            width: 6,
-          ),
-        if (_dateTime.minute != 0)
-          Text(
-            _timeSeparator,
-            style: defaultSubtitleStyle,
-          ),
-        SizedBox(
-          width: 6,
-        ),
-        if (_dateTime.minute != 0)
-          Text(
-            _hoursInLetters,
+        Positioned(
+          left: 50,
+          child: Text(
+            (_dateTime.minute != 0) ? _minutesPart : _hoursInLetters,
             style: boldSubtitleStyle,
+          ),
+        ),
+        if (_dateTime.minute != 0)
+          Positioned(
+            left: 250,
+            child: Text(
+              _timeSeparator,
+              style: defaultSubtitleStyle,
+            ),
+          ),
+        if (_dateTime.minute != 0)
+          Positioned(
+            left: 440,
+            child: Text(
+              _hoursInLetters,
+              style: boldSubtitleStyle,
+            ),
           ),
         if (_dateTime.minute == 0 && !_isMidnight && !_isNoon)
-          Text(
-            _minutesPart,
-            style: boldSubtitleStyle,
+          Positioned(
+            left: 350,
+            child: Text(
+              _minutesPart,
+              style: boldSubtitleStyle,
+            ),
           ),
-        SizedBox(
-          width: 2,
-        ),
         Text(
           '.',
           style: boldSubtitleStyle,

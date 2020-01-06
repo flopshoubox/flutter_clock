@@ -20,14 +20,16 @@ class ApPmLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: (!_isMidnight && !_isNoon)
-            ? Container(
-                height: 210,
-                child: Text(
-                  _label,
-                  style: titleTextStyle,
-                ),
-              )
-            : SizedBox.shrink());
+      color: Colors.white,
+      child: (!_isMidnight && !_isNoon)
+          ? Container(
+              height: 210,
+              child: Text(
+                _label,
+                style: titleTextStyle,
+              ),
+            )
+          : SizedBox.shrink(),
+    );
   }
 }
